@@ -12,21 +12,12 @@ import fs from "fs"
 const mcModsPath = path.join(process.env.APPDATA, "\\.minecraft\\mods")
 const dataPath = path.join(mcModsPath, "mcmodman.json")
 
+const getData = () => JSON.parse(fs.readFileSync(dataPath))
+const setData = (data) => fs.writeFileSync(dataPath, JSON.stringify(data))
+const applyRandomGradient = (string, gradients) => chalk.bold(gradients[Math.floor(Math.random() * gradients.length)](string))
+const sleep = (ms = 2000) => new Promise(resolve => setTimeout(resolve, ms))
+const intro = async () => console.log(gradient.summer.multiline(figlet.textSync("Minecraft Mod Manager")))
 
-
-function getData() {
-    return JSON.parse(fs.readFileSync(dataPath))
-}
-
-function setData(data) {
-    fs.writeFileSync(dataPath, JSON.stringify(data))
-}
-
-
-
-function applyRandomGradient(string, gradients) {
-    return chalk.bold(gradients[Math.floor(Math.random() * gradients.length)](string))
-}
 
 function createNecessaryFolders() {
     Array.of("Forge", "Fabric").forEach(modLoader => {
@@ -38,16 +29,6 @@ function createNecessaryFolders() {
     if(!fs.existsSync(dataPath)) {
         setData({})
     }
-}
-
-function sleep(ms = 2000) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-
-
-async function intro() {
-    console.log(gradient.summer.multiline(figlet.textSync("Minecraft Mod Manager")))
 }
 
 async function outro() {
@@ -129,15 +110,11 @@ function moveOldMods() {
 
     fs.readdirSync(mcModsPath)
     .filter(mod => path.extname(mod) == ".jar")
-    .forEach(mod => {
-        fs.renameSync(path.join(mcModsPath, mod), path.join(mcModsPath, modLoader, version, mod))
-    })
+    .forEach(mod => fs.renameSync(path.join(mcModsPath, mod), path.join(mcModsPath, modLoader, version, mod)))
 }
 
 function moveNewMods(mods, modLoader, version) {
-    mods.forEach(mod => {
-        fs.renameSync(path.join(mcModsPath, modLoader, version, mod), path.join(mcModsPath, mod))
-    })
+    mods.forEach(mod => fs.renameSync(path.join(mcModsPath, modLoader, version, mod), path.join(mcModsPath, mod)))
 
     const data = getData()
     data.modLoader = modLoader
